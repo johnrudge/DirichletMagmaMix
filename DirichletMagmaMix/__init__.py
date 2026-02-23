@@ -202,7 +202,7 @@ class UnmixedMelts:
             wts = self.weights * self.mass
             for i in range(samples):
                 randindex = np.random.choice(self.melts.index, 1, list(wts))[0]
-                mixed = mixed.append(self.melts[self.melts.index == randindex], ignore_index=True)
+                mixed = mixed._append(self.melts[self.melts.index == randindex], ignore_index=True)
         else:
             for i in range(samples):
                 alpha = self.gen_dirichlet_parameters(mixing_parameter)
@@ -212,7 +212,7 @@ class UnmixedMelts:
 
                 mix = self._mix_isotopes(mix, r[:, 0])
 
-                mixed = mixed.append(mix, ignore_index=True)
+                mixed = mixed._append(mix, ignore_index=True)
 
         return MixedMelts(mixed)
 
@@ -281,7 +281,7 @@ class UnmixedMelts:
 
             mix['crystallisation'] = C[i]
 
-            mixed = mixed.append(mix, ignore_index=True)
+            mixed = mixed._append(mix, ignore_index=True)
 
         return MixedMelts(mixed)
 
@@ -508,13 +508,13 @@ def import_pyMelt_geoSetting(geoSetting, weights=None, isotopes={}, **kwargs):
     for lithology_name in lithology_names:
         lith = copy(geoSetting.lithologies[lithology_name])
 
-        pressure = pressure.append(geoSetting.P, ignore_index=True)
+        pressure = pressure._append(geoSetting.P, ignore_index=True)
 
         dX = np.zeros(np.shape(lith.F)[0])
         dX[1:] = np.array(lith.F.iloc[1:]) - np.array(lith.F[:-1])
         dX = pd.Series(dX)
         prop_index = geoSetting.mantle.names.index(lithology_name)
-        mass = mass.append(dX * geoSetting.mantle.proportions[prop_index],
+        mass = mass._append(dX * geoSetting.mantle.proportions[prop_index],
                            ignore_index=True)
 
         if lithology_name in isotopes:
@@ -531,7 +531,7 @@ def import_pyMelt_geoSetting(geoSetting, weights=None, isotopes={}, **kwargs):
             if lith_other != lithology_name:
                 lith[lith_other] = np.tile(0.0, np.shape(lith.F)[0])
 
-        melts = melts.append(lith, ignore_index=True)
+        melts = melts._append(lith, ignore_index=True)
 
     melts = melts.drop(['P', 'T', 'F'], axis=1)
 
