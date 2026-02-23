@@ -195,15 +195,17 @@ class UnmixedMelts:
             The randomly mixed melts.
         """
 
-        mixed = pd.DataFrame(columns=self.melts.columns)
+        rows_list = []
 
         # N = 1 is just a randomly chosen melt
         if mixing_parameter == 1:
             wts = self.weights * self.mass
+            
             for i in range(samples):
                 randindex = np.random.choice(self.melts.index, 1, list(wts))[0]
-                mixed = mixed._append(self.melts[self.melts.index == randindex], ignore_index=True)
+                rows_list.append(self.melts.loc[randindex])
         else:
+
             for i in range(samples):
                 alpha = self.gen_dirichlet_parameters(mixing_parameter)
                 # Make an array of r values for each column:
@@ -211,8 +213,8 @@ class UnmixedMelts:
                 mix = (r * self.melts).sum()
 
                 mix = self._mix_isotopes(mix, r[:, 0])
-
-                mixed = mixed._append(mix, ignore_index=True)
+                rows_list.append(mix)
+        mixed = pd.DataFrame(rows_list, columns=self.melts.columns)
 
         return MixedMelts(mixed)
 
