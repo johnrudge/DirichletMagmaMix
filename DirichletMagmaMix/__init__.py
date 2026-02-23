@@ -200,7 +200,7 @@ class UnmixedMelts:
         # N = 1 is just a randomly chosen melt
         if mixing_parameter == 1:
             wts = self.weights * self.mass
-            
+
             for i in range(samples):
                 randindex = np.random.choice(self.melts.index, 1, list(wts))[0]
                 rows_list.append(self.melts.loc[randindex])
@@ -254,14 +254,13 @@ class UnmixedMelts:
         C = max_crystallisation * U**2
         N = mixing_min * (mixing_max / mixing_min) ** U
 
-        mixed = pd.DataFrame(columns=self.melts.columns + ['crystallisation'])
-        # mixed['crystallisation'] = C
+        rows_list = []
 
         for i, Ni in zip(range(samples), N):
             if Ni == 1:
                 wts = self.weights * self.mass
-                randindex = np.random.choice(self.melts.index, 1, list(wts))
-                mix = self.melts[self.melts.index == randindex]
+                randindex = np.random.choice(self.melts.index, 1, list(wts))[0]
+                mix = self.melts.loc[randindex]
             else:
                 alpha = self.gen_dirichlet_parameters(Ni)
                 r = np.tile(np.array([self.gen_mixing_weights(alpha)]),
@@ -283,7 +282,9 @@ class UnmixedMelts:
 
             mix['crystallisation'] = C[i]
 
-            mixed = mixed._append(mix, ignore_index=True)
+            rows_list.append(mix)
+
+        mixed = pd.DataFrame(rows_list, columns=list(self.melts.columns) + ['crystallisation'])
 
         return MixedMelts(mixed)
 
